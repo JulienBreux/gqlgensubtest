@@ -1,0 +1,11 @@
+type ObjectReturned {
+    name: String!
+}
+
+type Query {
+    Get(name: String!): ObjectReturned
+}
+
+type Subscription {
+    Updated(): ObjectReturned!
+}
