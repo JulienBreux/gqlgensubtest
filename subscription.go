@@ -21,18 +21,20 @@ func (sr *subscriptionResolver) Updated(ctx context.Context) (<-chan model.Objec
 	object := make(chan model.ObjectReturned, 1)
 
 	ticker := time.NewTicker(5 * time.Second)
+
 	go func() {
-		for t := range ticker.C {
-			object <- model.ObjectReturned{
-				Name: fmt.Sprintf("%s", t),
+		for {
+			select {
+			case t := <-ticker.C:
+				object <- model.ObjectReturned{
+					Name: fmt.Sprintf("%s", t),
+				}
+			case <-ctx.Done():
+				ticker.Stop()
+				close(object)
+				return
 			}
 		}
-	}()
-
-	// Stop ticker when client disconnect
-	go func() {
-		<-ctx.Done()
-		ticker.Stop()
 	}()
 
 	return object, nil
